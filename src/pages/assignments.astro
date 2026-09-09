@@ -1,0 +1,64 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import PageHeader from '../components/PageHeader.astro';
+import Section from '../components/Section.astro';
+import { Table, TableBody, TableCaption, TableCell, TableHead, TableHeader, TableRow } from '@/components/starwind/table';
+import { assignments, course } from '../data';
+
+const meta = `${assignments.length} assignments · ${course.term}`;
+---
+
+<BaseLayout title={`Assignments — ${course.code}: ${course.title}`} description="Coding assignments, projects, and submission progress.">
+  <article class="max-w-3xl">
+    <PageHeader title="Assignments" meta={meta} />
+
+    <Section id="overview-heading" title="Overview">
+      <div class="border border-border overflow-hidden">
+        <Table>
+          <TableCaption class="sr-only">Assignment overview</TableCaption>
+          <TableHeader>
+            <TableRow class="bg-muted/50">
+              <TableHead scope="col" class="w-16">#</TableHead>
+              <TableHead scope="col">Assignment</TableHead>
+              <TableHead scope="col" class="text-right w-20">Weight</TableHead>
+              <TableHead scope="col" class="w-32">Due</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {assignments.map((a) => (
+              <TableRow>
+                <TableCell class="font-medium">{a.id}</TableCell>
+                <TableCell class="font-medium">{a.title}</TableCell>
+                <TableCell class="text-right">{a.weight}%</TableCell>
+                <TableCell>{a.due}</TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+      </div>
+    </Section>
+
+    <Section id="details-heading" title="Details">
+      <div class="space-y-8">
+        {assignments.map((a) => (
+          <section aria-label={a.title}>
+            <h3 class="text-lg font-semibold mb-2">{a.id}. {a.title}</h3>
+            <dl class="grid sm:grid-cols-2 gap-x-6 gap-y-1 text-sm">
+              <dt class="text-muted-foreground">Due date</dt>
+              <dd class="font-medium">{a.due}</dd>
+              <dt class="text-muted-foreground">Weight</dt>
+              <dd class="font-medium">{a.weight}% of final grade</dd>
+            </dl>
+            <p class="mt-5 leading-relaxed">{a.description}</p>
+            <p class="mt-5 font-medium">Requirements:</p>
+            <ul class="list-disc pl-5 space-y-1 text-muted-foreground">
+              {a.requirements.map((req) => (
+                <li>{req}</li>
+              ))}
+            </ul>
+          </section>
+        ))}
+      </div>
+    </Section>
+  </article>
+</BaseLayout>

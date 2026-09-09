@@ -1,0 +1,12 @@
+---
+import Section from './Section.astro';
+import { prerequisites } from '../data';
+---
+
+<Section id="prereqs-heading" title="Prerequisites">
+  <ul class="list-disc pl-5 space-y-1">
+    {prerequisites.map((p) => (
+      <li>{p}</li>
+    ))}
+  </ul>
+</Section>

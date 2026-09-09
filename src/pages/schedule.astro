@@ -1,0 +1,60 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import PageHeader from '../components/PageHeader.astro';
+import { Table, TableBody, TableCaption, TableCell, TableHead, TableHeader, TableRow } from '@/components/starwind/table';
+import { course, materialByFile, weeks } from '../data';
+import { textLinkClass } from '../lib/ui';
+
+const scheduleMeta = `${course.code} · ${course.term} · ${course.schedule}, ${course.location}`;
+---
+
+<BaseLayout title={`Schedule — ${course.code}: ${course.title}`} description="Weekly topics, readings, and lecture materials.">
+  <article class="max-w-4xl">
+    <PageHeader title="Schedule" meta={scheduleMeta} />
+
+    <div class="mt-8 border border-border overflow-hidden">
+      <Table>
+        <TableCaption class="sr-only">Weekly lecture schedule</TableCaption>
+        <TableHeader>
+          <TableRow class="bg-muted/50">
+            <TableHead scope="col" class="w-16">Week</TableHead>
+            <TableHead scope="col" class="w-32">Date</TableHead>
+            <TableHead scope="col">Topic</TableHead>
+            <TableHead scope="col">Readings</TableHead>
+            <TableHead scope="col" class="w-28">Materials</TableHead>
+          </TableRow>
+        </TableHeader>
+        <TableBody>
+          {weeks.map((w) => (
+            <TableRow>
+              <TableCell class="font-medium">{w.week}</TableCell>
+              <TableCell class="whitespace-nowrap text-sm text-muted-foreground">{w.date}</TableCell>
+              <TableCell class="font-medium">{w.topic}</TableCell>
+              <TableCell>
+                <ul class="list-disc pl-4 text-sm text-muted-foreground">
+                  {w.readings.map((r) => (
+                    <li>{r}</li>
+                  ))}
+                </ul>
+              </TableCell>
+              <TableCell>
+                <ul class="space-y-1 text-sm">
+                  {w.materials.map((file) => {
+                    const material = materialByFile[file];
+                    return material ? (
+                      <li>
+                        <a href={`/materials/${material.path}/`} class={textLinkClass}>
+                          {material.label}
+                        </a>
+                      </li>
+                    ) : null;
+                  })}
+                </ul>
+              </TableCell>
+            </TableRow>
+          ))}
+        </TableBody>
+      </Table>
+    </div>
+  </article>
+</BaseLayout>

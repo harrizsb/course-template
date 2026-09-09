@@ -1,0 +1,14 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { courseMeta } from '../data';
+import PageHeader from '../components/PageHeader.astro';
+import { textLinkClass } from '../lib/ui';
+---
+
+<BaseLayout title="Page not found">
+  <article class="max-w-3xl">
+    <PageHeader title="Page not found" meta={courseMeta} />
+    <p class="mt-8 leading-relaxed">The page you're looking for doesn't exist or has been moved.</p>
+    <a href="/" class={`mt-5 inline-block ${textLinkClass}`}>Back to home</a>
+  </article>
+</BaseLayout>

@@ -1,0 +1,40 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import PageHeader from '../components/PageHeader.astro';
+import Section from '../components/Section.astro';
+import { course, courseMeta, resources } from '../data';
+import { textLinkClass } from '../lib/ui';
+---
+
+<BaseLayout title={`Resources — ${course.code}: ${course.title}`} description="Curated tools, references, and textbooks for the course.">
+  <article class="max-w-3xl">
+    <PageHeader title="Resources" meta={courseMeta} />
+
+    <div class="mt-10 space-y-10">
+      {resources.map((group) => {
+        const headingId = `resources-${group.category.toLowerCase().replace(/[^a-z0-9]+/g, '-')}`;
+        return (
+          <Section id={headingId} title={group.category}>
+            <ul class="space-y-4">
+              {group.items.map((item) => (
+                <li>
+                  <p class="font-medium">
+                    {item.url ? (
+                      <a href={item.url} class={textLinkClass} target="_blank" rel="noopener noreferrer">{item.title}</a>
+                    ) : (
+                      item.title
+                    )}
+                    {item.subtitle && (
+                      <span class="text-sm font-normal text-muted-foreground"> — {item.subtitle}</span>
+                    )}
+                  </p>
+                  {item.description && <p class="text-sm text-muted-foreground leading-snug mt-0.5">{item.description}</p>}
+                </li>
+              ))}
+            </ul>
+          </Section>
+        );
+      })}
+    </div>
+  </article>
+</BaseLayout>

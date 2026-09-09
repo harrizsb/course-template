@@ -1,0 +1,50 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import PageHeader from '../../components/PageHeader.astro';
+import { course, courseMeta, materials, type MaterialAsset } from '../../data';
+import { textLinkClass } from '../../lib/ui';
+
+/**
+ * Per-material preview page. The PDF is embedded as a base64 data URI at build
+ * time (scripts/encode-materials.mjs), so no direct file route exists for
+ * course materials; each preview page carries only its own document.
+ */
+export function getStaticPaths() {
+  return materials.map((material: MaterialAsset) => ({
+    params: { path: material.path },
+    props: { material },
+  }));
+}
+
+interface Props {
+  material: MaterialAsset;
+}
+
+const { material } = Astro.props;
+const sizeKb = Math.max(1, Math.round(material.bytes / 1024));
+const fileName = material.file.replace(/\//g, '-');
+const meta = `${courseMeta} · PDF · ${sizeKb} KB`;
+---
+
+<BaseLayout title={`${material.title} — ${course.code}: ${course.title}`} description={`${material.title} for ${course.code}: ${course.title}.`}>
+  <article class="max-w-4xl">
+    <PageHeader title={material.title} meta={meta} />
+
+    <p class="mt-8 text-sm text-muted-foreground">
+      Opens in your browser's built-in PDF viewer. If your device cannot display PDFs inline, use the download link below.
+    </p>
+
+    <div class="mt-4 border border-border overflow-hidden">
+      <object data={material.dataUri} type="application/pdf" class="h-screen w-full" aria-label={`${material.title} (PDF)`}>
+        <p class="p-4 text-sm text-muted-foreground">
+          This browser cannot display the PDF inline.
+          <a href={material.dataUri} download={fileName} class={textLinkClass}>Download {material.title}</a>
+        </p>
+      </object>
+    </div>
+
+    <p class="mt-4 text-sm">
+      <a href={material.dataUri} download={fileName} class={textLinkClass}>Download {material.title} (PDF, {sizeKb} KB)</a>
+    </p>
+  </article>
+</BaseLayout>

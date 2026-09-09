@@ -1,0 +1,61 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import PageHeader from '../components/PageHeader.astro';
+import Section from '../components/Section.astro';
+import PrerequisitesSection from '../components/PrerequisitesSection.astro';
+import { Table, TableBody, TableCaption, TableCell, TableHead, TableRow } from '@/components/starwind/table';
+import { course, courseMeta, navItems } from '../data';
+import { textLinkClass } from '../lib/ui';
+
+const infoRows = [
+  { label: 'Instructor', value: `${course.instructor.name} <${course.instructor.email}>` },
+  { label: 'Lectures', value: `${course.schedule}, ${course.location}` },
+  { label: 'Office hours', value: `${course.instructor.officeHours}, ${course.instructor.office}` },
+  { label: 'Term', value: course.term },
+];
+
+// Home is the current page, so it is not listed in the section index.
+const sectionItems = navItems.filter((item) => item.href !== '/');
+---
+
+<BaseLayout title={`${course.code}: ${course.title}`} description={course.description}>
+  <article class="max-w-3xl">
+    <PageHeader title={`${course.code}: ${course.title}`} meta={courseMeta} />
+
+    <p class="mt-8 leading-relaxed"><strong class="font-semibold">Description.</strong> {course.description}</p>
+
+    <Section id="course-info-heading" title="Course information">
+      <div class="border border-border overflow-hidden">
+        <Table>
+          <TableCaption class="sr-only">Course information</TableCaption>
+          <TableBody>
+            {infoRows.map((row) => (
+              <TableRow>
+                <TableHead scope="row" class="w-44 align-middle bg-muted/50">{row.label}</TableHead>
+                <TableCell>{row.value}</TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+      </div>
+    </Section>
+
+    <PrerequisitesSection />
+
+    <Section id="sections-heading" title="Course sections">
+      <div class="border border-border overflow-hidden">
+        <Table>
+          <TableCaption class="sr-only">Course sections</TableCaption>
+          <TableBody>
+            {sectionItems.map((item) => (
+              <TableRow>
+                <TableCell class="w-40 shrink-0"><a href={item.href} class={textLinkClass}>{item.label}</a></TableCell>
+                <TableCell class="text-muted-foreground">{item.description}</TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+      </div>
+    </Section>
+  </article>
+</BaseLayout>

@@ -1,0 +1,64 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import PageHeader from '../components/PageHeader.astro';
+import Section from '../components/Section.astro';
+import PrerequisitesSection from '../components/PrerequisitesSection.astro';
+import { Table, TableBody, TableCaption, TableCell, TableHead, TableHeader, TableRow } from '@/components/starwind/table';
+import { assignments, course, courseMeta, grading, policies } from '../data';
+
+const gradingRows = [
+  { item: 'Participation', weight: `${grading.participation}%` },
+  { item: `Assignments (${assignments.length})`, weight: `${grading.assignments}%` },
+  { item: 'Midterm project', weight: `${grading.midterm}%` },
+  { item: 'Final project', weight: `${grading.final}%` },
+];
+---
+
+<BaseLayout title={`Syllabus — ${course.code}: ${course.title}`} description={`Course syllabus, grading, and policies for ${course.code}: ${course.title}.`}>
+  <article class="max-w-3xl">
+    <PageHeader title="Syllabus" meta={courseMeta} />
+
+    <p class="mt-8 leading-relaxed"><strong class="font-semibold">Instructor.</strong> {course.instructor.name} ({course.instructor.email}), {course.instructor.office}, office hours {course.instructor.officeHours}.</p>
+    <p class="mt-5 leading-relaxed"><strong class="font-semibold">Lectures.</strong> {course.schedule}, {course.location}.</p>
+    <p class="mt-5 leading-relaxed"><strong class="font-semibold">Description.</strong> {course.description}</p>
+
+    <Section id="grading-heading" title="Grading">
+      <div class="border border-border overflow-hidden">
+        <Table>
+          <TableCaption class="sr-only">Grading components and weights</TableCaption>
+          <TableHeader>
+            <TableRow class="bg-muted/50">
+              <TableHead scope="col">Component</TableHead>
+              <TableHead scope="col" class="text-right w-28">Weight</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {gradingRows.map((row) => (
+              <TableRow>
+                <TableCell class="font-medium">{row.item}</TableCell>
+                <TableCell class="text-right">{row.weight}</TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+      </div>
+    </Section>
+
+    <Section id="policies-heading" title="Policies">
+      <div class="space-y-8">
+        {policies.map((policy) => (
+          <section aria-label={policy.title}>
+            <h3 class="text-lg font-semibold mb-2">{policy.title}</h3>
+            <ul class="list-disc pl-5 space-y-1 text-muted-foreground">
+              {policy.body.map((line) => (
+                <li>{line}</li>
+              ))}
+            </ul>
+          </section>
+        ))}
+      </div>
+    </Section>
+
+    <PrerequisitesSection />
+  </article>
+</BaseLayout>

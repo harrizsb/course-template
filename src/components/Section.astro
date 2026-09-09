@@ -1,0 +1,20 @@
+---
+/**
+ * Standard page section: owns the mt-10 rhythm and the h2 idiom.
+ * Every page section with an h2 MUST use this component so the pattern
+ * lives in exactly one place (see README section 5).
+ */
+interface Props {
+  /** Unique heading id, also used as the section's aria-labelledby target. */
+  id: string;
+  /** Section heading text. */
+  title: string;
+}
+
+const { id, title } = Astro.props;
+---
+
+<section aria-labelledby={id} class="mt-10">
+  <h2 id={id} class="text-2xl font-semibold border-b border-border pb-2 mb-4">{title}</h2>
+  <slot />
+</section>
