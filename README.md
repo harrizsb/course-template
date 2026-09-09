@@ -136,8 +136,8 @@ export const course: Course = { /* ... */ };
 export const grading: Grading = { /* ... */ };
 export const prerequisites: string[] = [ /* ... */ ];
 
-/** Standard PageHeader meta line, e.g. "CS 499 - Fall 2026 - Dr. Elena Vasquez". */
-export const courseMeta = `${course.code} - ${course.term} - ${course.instructor.name}`;
+/** Standard PageHeader meta line: "CS 499 · Fall 2026 · Dr. Elena Vasquez". */
+export const courseMeta = `${course.code} · ${course.term} · ${course.instructor.name}`;
 ```
 
 Edit `course`, `grading`, or `prerequisites` in place. `courseMeta` is derived; do not edit it. Use `courseMeta` for `PageHeader` `meta` and `course.lastUpdated` for footer freshness.
