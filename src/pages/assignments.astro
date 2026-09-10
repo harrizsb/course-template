@@ -3,18 +3,21 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 import PageHeader from '../components/PageHeader.astro';
 import Section from '../components/Section.astro';
 import { Table, TableBody, TableCaption, TableCell, TableHead, TableHeader, TableRow } from '@/components/starwind/table';
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/starwind/accordion';
+import { Badge } from '@/components/starwind/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/starwind/card';
 import { Button } from '@/components/starwind/button';
 import { assignments, course, rubricByAssignment } from '../data';
 import GamificationPanel from '../components/GamificationPanel.astro';
-import KaplayMissionGame from '../components/KaplayMissionGame';
+import AssignmentGame from '../components/AssignmentGame';
 
 const meta = `${assignments.length} assignments · ${course.term}`;
 ---
 
-<BaseLayout title={`Assignments — ${course.code}: ${course.title}`} description="Coding assignments, projects, and submission progress.">
+<BaseLayout title={`Assignments — ${course.code}: ${course.title}`} description="Coding assignments, practice games, and rubric score capture.">
   <article class="max-w-3xl">
     <PageHeader title="Assignments" meta={meta} />
+    <p class="mt-4 text-sm text-muted-foreground">Use one assignment at a time. Open a section for its brief, game, rubric, and score capture.</p>
 
     <Section id="overview-heading" title="Overview">
       <div class="border border-border overflow-hidden">
@@ -32,7 +35,10 @@ const meta = `${assignments.length} assignments · ${course.term}`;
             {assignments.map((a) => (
               <TableRow>
                 <TableCell class="font-medium">{a.id}</TableCell>
-                <TableCell class="font-medium">{a.title}</TableCell>
+                <TableCell class="font-medium">
+                  <a href={`#assignment-${a.id}`} class="text-link underline underline-offset-2 hover:text-primary">{a.title}</a>
+                  <span class="block text-xs text-muted-foreground">{a.kaplay.title}</span>
+                </TableCell>
                 <TableCell class="text-right">{a.weight}%</TableCell>
                 <TableCell>{a.due}</TableCell>
               </TableRow>
@@ -42,64 +48,54 @@ const meta = `${assignments.length} assignments · ${course.term}`;
       </div>
     </Section>
 
-    <GamificationPanel />
-
-    <KaplayMissionGame client:visible />
-
     <Section id="details-heading" title="Details">
-      <div class="space-y-8">
-        {assignments.map((a) => (
-          <section id={`assignment-${a.id}`} aria-label={a.title}>
-            <h3 class="text-lg font-semibold mb-2">{a.id}. {a.title}</h3>
-            <dl class="grid sm:grid-cols-2 gap-x-6 gap-y-1 text-sm">
-              <dt class="text-muted-foreground">Due date</dt>
-              <dd class="font-medium">{a.due}</dd>
-              <dt class="text-muted-foreground">Weight</dt>
-              <dd class="font-medium">{a.weight}% of final grade</dd>
-            </dl>
-            <p class="mt-5 leading-relaxed">{a.description}</p>
-            <p class="mt-5 font-medium">Requirements:</p>
-            <ul class="list-disc pl-5 space-y-1 text-muted-foreground">
-              {a.requirements.map((req) => (
-                <li>{req}</li>
-              ))}
-            </ul>
-            <div class="mt-6">
-              {(() => {
-                const rubric = rubricByAssignment[a.id];
-                if (!rubric) return null;
-                return (
-                  <Card>
+      <Accordion type="single" collapsible defaultValue="assignment-1">
+        {assignments.map((a) => {
+          const rubric = rubricByAssignment[a.id];
+          return (
+            <AccordionItem value={`assignment-${a.id}`} id={`assignment-${a.id}`}>
+              <AccordionTrigger>
+                <span class="flex min-w-0 flex-1 items-center justify-between gap-3 pr-3">
+                  <span class="truncate font-medium">{a.id}. {a.title}</span>
+                  <span class="shrink-0 text-xs text-muted-foreground">{a.due} · {a.weight}%</span>
+                </span>
+              </AccordionTrigger>
+              <AccordionContent>
+                <div class="space-y-6">
+                  <div class="space-y-2">
+                    <p class="text-sm leading-relaxed">{a.description}</p>
+                    <ul class="list-disc pl-5 space-y-1 text-sm text-muted-foreground">
+                      {a.requirements.map((req) => <li>{req}</li>)}
+                    </ul>
+                  </div>
+                  <Card size="sm">
                     <CardHeader>
-                      <div class="flex items-center justify-between">
-                        <CardTitle class="text-sm font-semibold">Grading Rubric</CardTitle>
-                        {rubric.pdfPath && (
-                          <Button variant="outline" size="sm" href={`/materials/${rubric.pdfPath}/`} target="_blank" rel="noopener" class="h-7 px-2 text-xs">
-                            View PDF
-                          </Button>
-                        )}
+                      <div class="flex items-center justify-between gap-3">
+                        <CardTitle class="text-sm">Rubric checkpoints</CardTitle>
+                        {rubric.pdfPath && <Button variant="outline" size="sm" href={`/materials/${rubric.pdfPath}/`} target="_blank" rel="noopener" class="h-7 px-2 text-xs">View PDF</Button>}
                       </div>
+                      <p class="text-xs text-muted-foreground">Each indicator is scored High, Middle, or Lower in the game.</p>
                     </CardHeader>
                     <CardContent>
                       <div class="space-y-3">
                         {rubric.criteria.map((criterion) => (
-                          <div class="flex justify-between items-start gap-4 text-xs">
-                            <div class="flex-1">
-                              <span class="font-medium text-foreground">{criterion.name}</span>
-                              <p class="text-muted-foreground leading-tight">{criterion.description}</p>
-                            </div>
-                            <span class="font-mono font-medium text-foreground shrink-0">{criterion.weight}%</span>
+                          <div class="flex items-start justify-between gap-3 text-xs">
+                            <div><span class="font-medium">{criterion.name}</span><p class="text-muted-foreground">{criterion.description}</p></div>
+                            <Badge variant="outline" class="shrink-0">{criterion.weight}%</Badge>
                           </div>
                         ))}
                       </div>
                     </CardContent>
                   </Card>
-                );
-              })()}
-            </div>
-            </section>
-        ))}
-      </div>
+                  <AssignmentGame assignmentId={a.id} client:visible />
+                </div>
+              </AccordionContent>
+            </AccordionItem>
+          );
+        })}
+      </Accordion>
     </Section>
+
+    <div class="mt-10"><GamificationPanel /></div>
   </article>
 </BaseLayout>

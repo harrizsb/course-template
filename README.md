@@ -147,7 +147,7 @@ Edit `course`, `grading`, or `prerequisites` in place. `courseMeta` is derived; 
 ```ts
 export interface Week {
   week: number;
-  date: string;       // e.g. "Aug 24, 2026"
+  date: string;       // dd/mm/yyyy
   topic: string;
   readings: string[];
   materials: string[]; // source paths under src/assets/materials, e.g. ["slides/week01.pdf"]
@@ -165,7 +165,7 @@ To add a week:
 // src/data/schedule.ts
 export const weeks: Week[] = [
   // ... existing weeks
-  { week: 14, date: 'Nov 23, 2026', topic: 'Final review', readings: ['Course notes'], materials: ['slides/week14.pdf'] },
+  { week: 14, date: '23/11/2026', topic: 'Final review', readings: ['Course notes'], materials: ['slides/week14.pdf'] },
 ];
 ```
 
@@ -176,31 +176,47 @@ Keep `week` numbers sequential. Each entry in `materials` is a source path relat
 ### 4.3 `src/data/assignments.ts`
 
 ```ts
+export interface KaplayGameConfig {
+  id: string;
+  title: string;
+  description: string;
+  controls: string[];
+}
+
 export interface Assignment {
   id: number;
   title: string;
-  due: string;          // e.g. "Sep 11, 2026"
+  due: string;          // dd/mm/yyyy
   weight: number;       // percent of final grade
   description: string;
   requirements: string[];
+  kaplay: KaplayGameConfig;
 }
-
-export const assignments: Assignment[] = [ /* ... */ ];
 ```
 
-To add an assignment, append to `assignments`:
+Every assignment has one small Kaplay practice game. The game is mounted inside its assignment's collapsible details panel with `client:visible`. It uses the assignment rubric as its scoring basis; there is no submission endpoint or server persistence.
+
+### 4.4 `src/data/rubrics.ts`
 
 ```ts
-// src/data/assignments.ts
-export const assignments: Assignment[] = [
-  // ... existing
-  { id: 7, title: 'Extra credit: performance audit', due: 'Dec 10, 2026', weight: 5, description: 'Audit any public site for Core Web Vitals.', requirements: ['Lighthouse report', 'Written recommendations'] },
-];
+export interface RubricCriterion {
+  id: string;
+  name: string;
+  description: string;
+  weight: number;
+  levels: { high: string; middle: string; lower: string };
+}
 ```
 
-Keep `id` unique and sequential. The assignments page renders an overview table and a details section from this single array, and the syllabus page derives the assignment count from it.
+Each criterion has three achievement descriptors. The shared score multipliers are High = 1.0, Middle = 0.6, and Lower = 0.3. The final score is `sum(criterion.weight * multiplier)` across all criteria. Students must rate every criterion, then use Capture final score to copy a breakdown containing the assignment, score, level for each criterion, and the date in `dd/mm/yyyy` format. The score is a practice record, not a submission.
 
-### 4.4 `src/data/resources.ts`
+Use stable criterion IDs for data references. Do not map game scoring by display names.
+
+### 4.5 International formats and metrics
+
+All authored course dates use `dd/mm/yyyy` (for example, `24/08/2026`). Authored measurements use SI/international metric units, such as milliseconds, kilobytes, metres, and degrees Celsius. Do not add units where a value is a percentage, score, count, or other dimensionless quantity.
+
+### 4.6 `src/data/resources.ts`
 
 ```ts
 export interface ResourceItem {
@@ -642,7 +658,7 @@ export interface Handout {
 }
 
 export const handouts: Handout[] = [
-  { id: 1, title: 'Freeze checklist', file: 'handouts/freeze-checklist.pdf', date: 'Aug 24, 2026' },
+  { id: 1, title: 'Freeze checklist', file: 'handouts/freeze-checklist.pdf', date: '24/08/2026' },
 ];
 ```
 
