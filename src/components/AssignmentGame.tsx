@@ -99,7 +99,7 @@ export default function AssignmentGame({ assignmentId }: Props) {
 
   return <div class="mt-5 space-y-3">
     {phase === 'splash' && (
-      <div class={card({ size: 'sm' })} data-size="sm" data-slot="card">
+      <div class={card({ size: 'sm' })} data-sw-card data-size="sm" data-slot="card">
         <div class={cardHeader()}>
           <p class="text-sm text-muted-foreground">Assignment {assignmentId}</p>
           <h2 class={cardTitle()}>{assignment.title}</h2>
@@ -142,7 +142,7 @@ export default function AssignmentGame({ assignmentId }: Props) {
             </p>
           </div>
         ) : (
-          <div ref={containerRef} class={card({ size: 'sm', class: 'overflow-hidden p-0' })} data-size="sm" data-slot="card" aria-label={`${assignment.title}. Use left and right arrows to move and Space to jump.`} />
+          <div ref={containerRef} class={card({ size: 'sm', class: 'overflow-hidden p-0' })} data-sw-card data-size="sm" data-slot="card" aria-label={`${assignment.title}. Use left and right arrows to move and Space to jump.`} />
         )}
         {checkpoint && (
           <div class={itemGroup()}>
@@ -189,7 +189,7 @@ export default function AssignmentGame({ assignmentId }: Props) {
       </>
     )}
     {phase === 'ended' && (
-      <div class={card({ size: 'sm' })} data-size="sm" data-slot="card">
+      <div class={card({ size: 'sm' })} data-sw-card data-size="sm" data-slot="card">
         <div class={cardHeader()}>
           <h2 class={cardTitle()}>Game complete</h2>
           <p class={cardDescription()}>
