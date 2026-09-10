@@ -28,3 +28,4 @@ Compose pages using existing Starwind components (Legos).
 
 ## Output
 - Concise, production-ready Astro code only. No explanations unless asked.
+- **Engineering principles:** Guide load-bearing code with SOLID; apply YAGNI and avoid abstractions without a clear responsibility or a real consumer need.
