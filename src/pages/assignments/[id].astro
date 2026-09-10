@@ -1,0 +1,82 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import PageHeader from '../../components/PageHeader.astro';
+import Section from '../../components/Section.astro';
+import { Badge } from '@/components/starwind/badge';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/starwind/card';
+import { Button } from '@/components/starwind/button';
+import { assignments, course, rubricByAssignment, type Assignment } from '../../data';
+import AssignmentGame from '../../components/AssignmentGame';
+
+/**
+ * Per-assignment detail page: brief, requirements, rubric, and the practice
+ * game. The index page links here so only one game island loads at a time.
+ */
+export function getStaticPaths() {
+  return assignments.map((assignment: Assignment) => ({
+    params: { id: String(assignment.id) },
+    props: { assignment },
+  }));
+}
+
+interface Props {
+  assignment: Assignment;
+}
+
+const { assignment } = Astro.props;
+const rubric = rubricByAssignment[assignment.id];
+if (!rubric) {
+  throw new Error(`Missing rubric for assignment ${assignment.id}`);
+}
+
+const meta = `Due ${assignment.due} · Weight ${assignment.weight}%`;
+---
+
+<BaseLayout title={`${assignment.id}. ${assignment.title} — ${course.code}: ${course.title}`} description={assignment.description}>
+  <article class="max-w-3xl">
+    <PageHeader title={`${assignment.id}. ${assignment.title}`} meta={meta} />
+
+    <p class="mt-4 text-sm">
+      <Button variant="ghost" size="sm" href="/assignments/" class="h-7 px-2 text-xs">&larr; All assignments</Button>
+    </p>
+
+    <Section id="brief" title="Brief">
+      <p class="text-sm leading-relaxed">{assignment.description}</p>
+    </Section>
+
+    <Section id="requirements" title="Requirements">
+      <ul class="list-disc pl-5 space-y-1 text-sm text-muted-foreground">
+        {assignment.requirements.map((requirement) => <li>{requirement}</li>)}
+      </ul>
+    </Section>
+
+    <Section id="rubric" title="Rubric">
+      <Card size="sm">
+        <CardHeader>
+          <div class="flex items-center justify-between gap-3">
+            <CardTitle class="text-sm">Rubric checkpoints</CardTitle>
+            {rubric.pdfPath && <Button variant="outline" size="sm" href={`/materials/${rubric.pdfPath}/`} target="_blank" rel="noopener" class="h-7 px-2 text-xs">View PDF</Button>}
+          </div>
+          <p class="text-xs text-muted-foreground">Each indicator is scored High, Middle, or Lower in the game.</p>
+        </CardHeader>
+        <CardContent>
+          <div class="space-y-3">
+            {rubric.criteria.map((criterion) => (
+              <div class="flex items-start justify-between gap-3 text-xs">
+                <div><span class="font-medium">{criterion.name}</span><p class="text-muted-foreground">{criterion.description}</p></div>
+                <Badge variant="outline" class="shrink-0">{criterion.weight}%</Badge>
+              </div>
+            ))}
+          </div>
+        </CardContent>
+      </Card>
+    </Section>
+
+    <Section id="game" title="Practice game">
+      <p class="text-sm text-muted-foreground">{assignment.kaplay.title}: {assignment.kaplay.description}</p>
+      <div class="mt-4">
+        <AssignmentGame assignmentId={assignment.id} client:visible />
+      </div>
+    </Section>
+  </article>
+</BaseLayout>

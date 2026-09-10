@@ -8,7 +8,7 @@ export interface Week {
   /** Source paths under src/assets/materials/, resolved through materialByFile. */
   materials: string[];
   /** Assignment due this week, if any. Resolved against assignments and linked
-   *  to /assignments/#assignment-<id> on the schedule page. */
+   * to /assignments/<id>/ on the schedule page. */
   assignmentId?: Assignment['id'];
 }
 

@@ -35,7 +35,7 @@ const scheduleMeta = `${course.code} · ${course.term} · ${course.schedule}, ${
                 <TableCell class="font-medium">{w.topic}</TableCell>
                 <TableCell>
                   {assignment ? (
-                    <a href={`/assignments/#assignment-${assignment.id}`} class={textLinkClass}>
+                    <a href={`/assignments/${assignment.id}/`} class={textLinkClass}>
                       <span class="font-medium">{assignment.title}</span>
                       <span class="block text-sm text-muted-foreground">Due {assignment.due}</span>
                     </a>
