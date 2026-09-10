@@ -13,6 +13,15 @@
 | Repo | `github.com/harrizsb/course-template` |
 | Node | 24.20.0 (verified runtime) |
 | Package manager | npm 12.0.2 (verified runtime) |
+ 
+## Dependencies
+
+This site requires the local `course-template` repository checkout (`github.com/harrizsb/course-template`) and the Kaplay `kaplay@3001.0.19` package and skill/toolchain. These are required local dependencies, not optional substitutes.
+
+### AI agent preflight
+
+Before coding or running commands, verify that the `course-template` checkout is the current workspace and that the Kaplay skill/toolchain is available locally with `node_modules/kaplay/package.json` reporting version `3001.0.19`. If either dependency is missing, STOP and inform the human exactly what is missing and how to install it. Never improvise, substitute another version, or continue with a guessed toolchain. Kaplay 3001 code must not mix `kaplay@4000-alpha` idioms: call `setGravity` after initialization, and use `hp()` as a method.
+
 
 Versions are declared in `package.json` as caret ranges; the resolved install lives in `package-lock.json`. Do not invent other versions.
 
@@ -56,6 +65,7 @@ All commands run from the repo root `/home/butler/course-template`.
 | `src/components/Section.astro` | Standard page section: owns the `mt-10` rhythm and the `h2` idiom |
 | `src/components/PrerequisitesSection.astro` | Reusable prerequisites list section |
 | `src/components/starwind/` | Vendored Starwind UI components - do not hand-edit except via Starwind tooling |
+| `src/components/AssignmentGame.tsx` | Client-visible Kaplay practice game and rubric scoring UI |
 | `src/components/starwind/card/` | Card primitives (`Card`, `CardHeader`, `CardTitle`, `CardContent`, etc.) |
 | `src/components/starwind/table/` | Table primitives (`Table`, `TableHeader`, `TableBody`, `TableRow`, `TableHead`, `TableCell`, `TableCaption`, `TableFoot`) |
 | `src/components/starwind/button/` | Button primitive |
@@ -194,6 +204,30 @@ export interface Assignment {
 }
 ```
 
+To add an assignment:
+
+```ts
+// src/data/assignments.ts
+export const assignments: Assignment[] = [
+  // ... existing assignments
+  {
+    id: 7,
+    title: 'Interactive course showcase',
+    due: '11/12/2026',
+    weight: 10,
+    description: 'Build an interactive course showcase with Astro and Kaplay.',
+    requirements: ['Git repository with README', 'Deployed static build', 'Accessible controls'],
+    kaplay: {
+      id: 'game-showcase',
+      title: 'Showcase Sprint',
+      description: 'Collect the pieces needed for a polished course showcase.',
+      controls: ['Left/Right arrows', 'Space to jump'],
+    },
+  },
+];
+```
+
+
 Every assignment has one small Kaplay practice game. The game is mounted inside its assignment's collapsible details panel with `client:visible`. It uses the assignment rubric as its scoring basis; there is no submission endpoint or server persistence.
 
 ### 4.4 `src/data/rubrics.ts`
@@ -260,7 +294,7 @@ export const resources: ResourceGroup[] = [
 
 Only `title` is required. External links render with `target="_blank" rel="noopener noreferrer"`.
 
-### 4.5 `src/data/navigation.ts`
+### 4.7 `src/data/navigation.ts`
 
 ```ts
 export interface NavItem {
@@ -290,7 +324,7 @@ export const navItems: NavItem[] = [
 
 `BaseLayout.astro` renders `href` and `label` in the header nav and highlights the current page by comparing `Astro.url.pathname` (trailing-slash stripped) to `item.href`. The home page renders every non-`/` item in its "Course sections" table using `label` and `description`. Use root-relative `href` values only.
 
-### 4.6 `src/data/policies.ts`
+### 4.8 `src/data/policies.ts`
 
 ```ts
 export interface Policy {
@@ -303,7 +337,7 @@ export const policies: Policy[] = [ /* ... */ ];
 
 To add a policy, append an object with a `title` and a `body` array of paragraph strings. The syllabus page renders them as `h3` blocks under the "Policies" section.
 
-### 4.7 `src/data/materials.generated.ts` (generated)
+### 4.9 `src/data/materials.generated.ts` (generated)
 
 Never edit this file by hand. It is produced by `npm run materials` from `scripts/encode-materials.mjs`.
 
@@ -342,7 +376,7 @@ const material = materialByFile['slides/week01.pdf'];
 {material && <a href={`/materials/${material.path}/`} class={textLinkClass}>{material.label}</a>}
 ```
 
-### 4.8 Adding a new data module
+### 4.10 Adding a new data module
 
 See section 12.
 
