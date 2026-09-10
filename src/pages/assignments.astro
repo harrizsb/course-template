@@ -2,6 +2,7 @@
 import BaseLayout from '../layouts/BaseLayout.astro';
 import PageHeader from '../components/PageHeader.astro';
 import { Item, ItemActions, ItemContent, ItemDescription, ItemGroup, ItemTitle } from '@/components/starwind/item';
+import { Badge } from '@/components/starwind/badge';
 import { assignments, course } from '../data';
 
 const meta = `${assignments.length} assignments · ${course.term}`;
@@ -14,15 +15,15 @@ const meta = `${assignments.length} assignments · ${course.term}`;
 
     <ItemGroup class="mt-10 gap-2" aria-label="Assignments">
       {assignments.map((assignment) => (
-        <Item as="a" role="listitem" href={`/assignments/${assignment.id}/`} variant="outline" size="sm">
+        <Item as="a" href={`/assignments/${assignment.id}/`} variant="outline" size="sm">
           <ItemContent>
             <ItemTitle>{assignment.id}. {assignment.title}</ItemTitle>
             <ItemDescription>{assignment.kaplay.title} · {assignment.kaplay.description}</ItemDescription>
           </ItemContent>
           <ItemActions class="flex-col items-end gap-1 text-xs text-muted-foreground sm:flex-row sm:gap-3">
             <span>Due {assignment.due}</span>
-            <span>{assignment.weight}%</span>
-            <span class="font-medium text-foreground">Open assignment</span>
+            <span>Weight {assignment.weight}%</span>
+            <Badge size="sm" variant="secondary">Open</Badge>
           </ItemActions>
         </Item>
       ))}
