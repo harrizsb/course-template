@@ -2,6 +2,7 @@
 
 ## Stack & Context
 - Astro (Strict SSG), Starwind UI (via MCP), Tailwind, Cloudflare Pages.
+- Always query Starwind MCP for components, tokens, and accessibility rules before generating code.
 - Always load the kaplay-3001 skill and query the kaplay MCP before writing game code.
 - Kaplay is pinned to exactly kaplay@3001.0.19. Never mix kaplay@4000-alpha idioms. Gravity is setGravity() after kaplay(), never a kaplay({ gravity }) option.
 
