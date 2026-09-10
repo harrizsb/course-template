@@ -1,0 +1,59 @@
+---
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './starwind/card';
+import { Badge } from './starwind/badge';
+import { badges, getLevelForXp, levels, missions } from '../data';
+
+interface Props {
+  currentXp?: number;
+  completedMissionIds?: string[];
+}
+
+const { currentXp = 0, completedMissionIds = [] } = Astro.props;
+const level = getLevelForXp(currentXp);
+const nextLevel = levels[level.level];
+const earnedMissionIds = new Set(completedMissionIds);
+const earnedBadges = badges.filter((badge) => earnedMissionIds.has(`mission-${badge.assignmentId}`));
+---
+
+<section aria-labelledby="gamification-heading" class="mt-10">
+  <Card>
+    <CardHeader>
+      <CardTitle id="gamification-heading">Mission Control</CardTitle>
+      <CardDescription>Static assignment progress for the six course assignments. Progress is intentionally static until a persistence layer is connected. The interactive Kaplay mission run below is a separate playable starter.</CardDescription>
+    </CardHeader>
+    <CardContent>
+      <div class="grid gap-6 md:grid-cols-[minmax(0,1fr)_minmax(0,1fr)]">
+        <div>
+          <p class="text-sm text-muted-foreground">Current level</p>
+          <p class="mt-1 text-2xl font-semibold">Level {level.level}: {level.name}</p>
+          {nextLevel ? (
+            <p class="mt-1 text-sm text-muted-foreground">{currentXp} / {nextLevel.xpRequired} XP toward Level {nextLevel.level}</p>
+          ) : (
+            <p class="mt-1 text-sm text-muted-foreground">Maximum level reached</p>
+          )}
+        </div>
+        <div>
+          <p class="text-sm text-muted-foreground">Badges earned</p>
+          <div class="mt-2 flex flex-wrap gap-2" aria-label={`${earnedBadges.length} badges earned`}>
+            {earnedBadges.length > 0 ? earnedBadges.map((badge) => <Badge variant="success">{badge.name}</Badge>) : <Badge variant="outline">No badges yet</Badge>}
+          </div>
+        </div>
+      </div>
+
+      <div class="mt-6 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+        {missions.map((mission) => {
+          const completed = earnedMissionIds.has(mission.id);
+          return (
+            <article class="rounded-lg border border-border p-4" aria-label={`Mission: ${mission.title}`}>
+              <div class="flex items-start justify-between gap-3">
+                <h3 class="font-medium">{mission.title}</h3>
+                <Badge variant={completed ? 'success' : 'outline'}>{completed ? 'Complete' : `+${mission.xp} XP`}</Badge>
+              </div>
+              <p class="mt-2 text-sm text-muted-foreground">{mission.description}</p>
+            </article>
+          );
+        })}
+      </div>
+    </CardContent>
+  </Card>
+</section>
