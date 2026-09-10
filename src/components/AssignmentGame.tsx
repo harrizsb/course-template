@@ -1,20 +1,27 @@
 import { useEffect, useRef, useState } from 'preact/hooks';
 import type { KAPLAYCtx } from 'kaplay';
-import { assignments } from '../data/assignments';
-import { rubricByAssignment } from '../data/rubrics';
+import { assignments, rubricByAssignment } from '../data';
 interface Props { assignmentId: number; }
 type Level = 'high' | 'middle' | 'lower';
 const MULTIPLIER: Record<Level, number> = { high: 1, middle: 0.6, lower: 0.3 };
+
 export default function AssignmentGame({ assignmentId }: Props) {
   const containerRef = useRef<HTMLDivElement>(null);
-  const [error, setError] = useState(false), [captured, setCaptured] = useState(false), [pending, setPending] = useState<string | null>(null), [summary, setSummary] = useState('');
+  const [error, setError] = useState(false), [captured, setCaptured] = useState(false), [summary, setSummary] = useState('');
   const [levels, setLevels] = useState<Record<string, Level>>({});
+  const [pending, setPending] = useState<string | null>(null);
+  const pendingRef = useRef<string | null>(null);
+  const levelsRef = useRef<Record<string, Level>>({});
+  levelsRef.current = levels;
+  pendingRef.current = pending;
+
   const assignment = assignments.find((a) => a.id === assignmentId)!;
   const rubric = rubricByAssignment[assignmentId];
   const score = rubric.criteria.reduce((sum, c) => sum + (levels[c.id] ? c.weight * MULTIPLIER[levels[c.id]] : 0), 0);
   const maxScore = rubric.criteria.reduce((sum, c) => sum + c.weight, 0);
   const complete = rubric.criteria.every((c) => Boolean(levels[c.id]));
   const checkpoint = rubric.criteria.find((c) => c.id === pending);
+
   useEffect(() => {
     let k: KAPLAYCtx | undefined, cancelled = false;
     async function init() {
@@ -24,14 +31,17 @@ export default function AssignmentGame({ assignmentId }: Props) {
         k = kaplay({ root: container, width: 640, height: 260, background: [250, 250, 249], global: false }); k.setGravity(1200);
         const player = k.add([k.rect(24, 24), k.pos(40, 190), k.area(), k.body(), k.color(153, 27, 27), 'player']);
         k.add([k.rect(640, 24), k.pos(0, 236), k.area(), k.body({ isStatic: true }), k.color(64, 64, 64)]);
-        rubric.criteria.forEach((criterion, index) => { const token = k!.add([k!.rect(22, 22), k!.pos(100 + index * 90, 190 - (index % 2) * 45), k!.area(), k!.color(217, 119, 6), 'criterion']); token.onCollide('player', () => { if (pending || levels[criterion.id]) return; k?.destroy(token); setPending(criterion.id); }); });
-        k.onKeyDown('left', () => { if (!pending) player.move(-220, 0); }); k.onKeyDown('right', () => { if (!pending) player.move(220, 0); }); k.onKeyPress('space', () => { if (!pending && player.isGrounded()) player.jump(500); });
+        rubric.criteria.forEach((criterion, index) => { const token = k!.add([k!.rect(22, 22), k!.pos(100 + index * 90, 190 - (index % 2) * 45), k!.area(), k!.color(217, 119, 6), 'criterion']); token.onCollide('player', () => { if (pendingRef.current) return; if (levelsRef.current[criterion.id]) return; pendingRef.current = criterion.id; k?.destroy(token); setPending(criterion.id); }); });
+        k.onKeyDown('left', () => { if (!pendingRef.current) player.move(-220, 0); }); k.onKeyDown('right', () => { if (!pendingRef.current) player.move(220, 0); }); k.onKeyPress('space', () => { if (!pendingRef.current && player.isGrounded()) player.jump(500); });
       } catch { if (!cancelled) setError(true); }
     }
     void init(); return () => { cancelled = true; k?.quit(); };
   }, [assignmentId]);
-  const choose = (level: Level) => { if (pending) setLevels((current) => ({ ...current, [pending]: level })); setPending(null); };
+
+  const choose = (level: Level) => { if (pending) { setLevels((current) => ({ ...current, [pending]: level })); pendingRef.current = null; setPending(null); } };
+
   const capture = async () => { if (!complete) return; const text = `CS499 A${assignmentId} - ${score.toFixed(1)}/${maxScore} - ${rubric.criteria.map((c) => `${c.name}: ${levels[c.id]}`).join('; ')} - captured ${new Date().toLocaleDateString('en-GB')}`; setSummary(text); try { await navigator.clipboard.writeText(text); setCaptured(true); } catch { setCaptured(false); } };
+
   return <div class="mt-5 space-y-3">
     <div class="flex items-center justify-between gap-3"><p class="text-sm font-medium">{assignment.kaplay.title}</p><output class="text-sm text-muted-foreground" aria-live="polite">Score: {score.toFixed(1)} / {maxScore}</output></div>
     {error ? <p class="border border-border p-4 text-sm text-muted-foreground" role="status">The interactive game is unavailable. Review the rubric levels below and record your result manually.</p> : <div ref={containerRef} class="border border-border" aria-label={`${assignment.kaplay.title}. Use left and right arrows to move and Space to jump.`} />}
