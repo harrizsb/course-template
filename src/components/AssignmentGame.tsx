@@ -18,6 +18,7 @@ export default function AssignmentGame({ assignmentId }: Props) {
   const [levels, setLevels] = useState<Record<string, Level>>({});
   const [pending, setPending] = useState<string | null>(null);
   const [endDate, setEndDate] = useState('');
+  const [finalScore, setFinalScore] = useState<number | null>(null);
   const pendingRef = useRef<string | null>(null);
   const levelsRef = useRef<Record<string, Level>>({});
   levelsRef.current = levels;
@@ -66,7 +67,7 @@ export default function AssignmentGame({ assignmentId }: Props) {
   const start = () => {
     if (!studentId.trim()) return;
     setLevels({}); levelsRef.current = {}; setPending(null); pendingRef.current = null;
-    setError(false); setCaptured(false); setSummary(''); setEndDate('');
+    setError(false); setCaptured(false); setSummary(''); setEndDate(''); setFinalScore(null);
     phaseRef.current = 'playing'; setPhase('playing');
   };
 
@@ -78,6 +79,8 @@ export default function AssignmentGame({ assignmentId }: Props) {
     pendingRef.current = null;
     setLevels(next); setPending(null);
     if (rubric.criteria.every((c) => Boolean(next[c.id]))) {
+      const finalizedScore = rubric.criteria.reduce((sum, c) => sum + c.weight * MULTIPLIER[next[c.id]], 0);
+      setFinalScore(finalizedScore);
       const date = new Date().toLocaleDateString('en-GB');
       setEndDate(date); phaseRef.current = 'ended'; setPhase('ended');
     }
@@ -85,8 +88,8 @@ export default function AssignmentGame({ assignmentId }: Props) {
 
   const capture = async () => {
     if (phase !== 'ended') return;
-    const freshScore = rubric.criteria.reduce((sum, c) => sum + c.weight * MULTIPLIER[levelsRef.current[c.id]], 0);
-    const text = `CS499 A${assignmentId}${studentId.trim() ? ` - ${studentId.trim()}` : ''} - ${freshScore.toFixed(1)}/${maxScore} - captured ${endDate}`;
+    const capturedScore = finalScore ?? rubric.criteria.reduce((sum, c) => sum + c.weight * MULTIPLIER[levelsRef.current[c.id]], 0);
+    const text = `CS499 A${assignmentId}${studentId.trim() ? ` - ${studentId.trim()}` : ''} - ${capturedScore.toFixed(1)}/${maxScore} - captured ${endDate}`;
     setSummary(text);
     try { await navigator.clipboard.writeText(text); setCaptured(true); } catch { setCaptured(false); }
   };
@@ -94,6 +97,6 @@ export default function AssignmentGame({ assignmentId }: Props) {
   return <div class="mt-5 space-y-3">
     {phase === 'splash' && <div class="border border-border p-5 space-y-3"><p class="text-sm text-muted-foreground">Assignment {assignmentId}</p><h2 class="text-lg font-medium">{assignment.title}</h2><p class="text-sm text-muted-foreground">{assignment.kaplay.description}</p><label class="block text-sm font-medium" for={`student-id-${assignmentId}`}>Student ID<input id={`student-id-${assignmentId}`} class="mt-1 block w-full border border-border px-3 py-2" value={studentId} onInput={(event) => setStudentId((event.currentTarget as HTMLInputElement).value)} /></label><button type="button" class="border border-border px-3 py-2 text-sm" disabled={!studentId.trim()} onClick={start}>Start game</button></div>}
     {phase === 'playing' && <><div class="flex items-center justify-between gap-3"><p class="text-sm font-medium">{assignment.title}</p><output class="text-sm text-muted-foreground" aria-live="polite">Score: {score.toFixed(1)} / {maxScore}</output></div>{error ? <p class="border border-border p-4 text-sm text-muted-foreground" role="status">The interactive game is unavailable. Review the rubric levels below and record your result manually.</p> : <div ref={containerRef} class="border border-border" aria-label={`${assignment.title}. Use left and right arrows to move and Space to jump.`} />}{checkpoint && <div class="border border-border p-3 space-y-2" role="group" aria-label={`Choose level for ${checkpoint.name}`}><p class="text-sm font-medium">{checkpoint.name} checkpoint</p><p class="text-xs text-muted-foreground">{checkpoint.description}</p><div class="grid gap-2 sm:grid-cols-3">{(['high', 'middle', 'lower'] as Level[]).map((level) => <button type="button" class="border border-border px-2 py-2 text-left text-xs hover:bg-muted" onClick={() => choose(level)}><span class="font-medium capitalize">{level}</span><span class="mt-1 block text-muted-foreground">{checkpoint.levels[level]}</span></button>)}</div></div>}<div class="space-y-1">{rubric.criteria.map((c) => <div class="flex justify-between text-xs"><span class="text-muted-foreground">{c.name}</span><span class="font-mono">{levels[c.id] ? `${levels[c.id]}: ${(c.weight * MULTIPLIER[levels[c.id]]).toFixed(1)}/${c.weight}` : `0/${c.weight}`}</span></div>)}</div><p class="text-xs text-muted-foreground">Practice score only. Nothing is submitted or stored.</p></>}
-    {phase === 'ended' && <div class="border border-border p-5 space-y-3"><h2 class="text-lg font-medium">Game complete</h2><p class="text-sm">Total score: <strong>{score.toFixed(1)} / {maxScore}</strong></p><p class="text-sm text-muted-foreground">Captured: {endDate}</p><button type="button" class="text-xs underline" onClick={capture}>{captured ? 'Score copied' : 'Copy result'}</button>{summary && <p class="select-text break-words border border-border p-2 text-xs text-muted-foreground" role="status">{captured ? 'Copied: ' : 'Copy unavailable. Select this summary: '}{summary}</p>}</div>}
+    {phase === 'ended' && <div class="border border-border p-5 space-y-3"><h2 class="text-lg font-medium">Game complete</h2><p class="text-sm">Total score: <strong>{(finalScore ?? 0).toFixed(1)} / {maxScore}</strong></p><p class="text-sm text-muted-foreground">Captured: {endDate}</p><button type="button" class="text-xs underline" onClick={capture}>{captured ? 'Score copied' : 'Copy result'}</button>{summary && <p class="select-text break-words border border-border p-2 text-xs text-muted-foreground" role="status">{captured ? 'Copied: ' : 'Copy unavailable. Select this summary: '}{summary}</p>}</div>}
   </div>;
 }
