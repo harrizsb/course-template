@@ -1,6 +1,7 @@
 ---
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import PageHeader from '../../components/PageHeader.astro';
+import PdfViewer from '../../components/PdfViewer';
 import { course, courseMeta, materials, type MaterialAsset } from '../../data';
 import { textLinkClass } from '../../lib/ui';
 
@@ -31,16 +32,11 @@ const meta = `${courseMeta} · PDF · ${sizeKb} KB`;
     <PageHeader title={material.title} meta={meta} />
 
     <p class="mt-8 text-sm text-muted-foreground">
-      Opens in your browser's built-in PDF viewer. If your device cannot display PDFs inline, use the download link below.
+      Preview the document below, page by page. If your device cannot display the preview, use the accessible download link.
     </p>
 
-    <div class="mt-4 border border-border overflow-hidden">
-      <object data={material.dataUri} type="application/pdf" class="h-screen w-full" aria-label={`${material.title} (PDF)`}>
-        <p class="p-4 text-sm text-muted-foreground">
-          This browser cannot display the PDF inline.
-          <a href={material.dataUri} download={fileName} class={textLinkClass}>Download {material.title}</a>
-        </p>
-      </object>
+    <div class="mt-4">
+      <PdfViewer client:idle dataUri={material.dataUri} title={material.title} fileName={fileName} />
     </div>
 
     <p class="mt-4 text-sm">
