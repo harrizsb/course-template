@@ -99,7 +99,7 @@ export default function AssignmentGame({ assignmentId }: Props) {
 
   return <div class="mt-5 space-y-3">
     {phase === 'splash' && (
-      <div class={card({ size: 'sm' })}>
+      <div class={card({ size: 'sm' })} data-size="sm" data-slot="card">
         <div class={cardHeader()}>
           <p class="text-sm text-muted-foreground">Assignment {assignmentId}</p>
           <h2 class={cardTitle()}>{assignment.title}</h2>
@@ -142,7 +142,7 @@ export default function AssignmentGame({ assignmentId }: Props) {
             </p>
           </div>
         ) : (
-          <div ref={containerRef} class="border border-border" aria-label={`${assignment.title}. Use left and right arrows to move and Space to jump.`} />
+          <div ref={containerRef} class={card({ size: 'sm', class: 'overflow-hidden p-0' })} data-size="sm" data-slot="card" aria-label={`${assignment.title}. Use left and right arrows to move and Space to jump.`} />
         )}
         {checkpoint && (
           <div class={itemGroup()}>
@@ -176,10 +176,10 @@ export default function AssignmentGame({ assignmentId }: Props) {
                 <span class={itemDescription()}>{criterion.name}</span>
               </div>
               <div class={itemActions()}>
-                <span class="font-mono text-xs">
+                <span class={levels[criterion.id] ? 'text-sm font-medium text-foreground' : 'text-sm text-muted-foreground'}>
                   {levels[criterion.id]
                     ? `${levels[criterion.id]}: ${(criterion.weight * MULTIPLIER[levels[criterion.id]]).toFixed(1)}/${criterion.weight}`
-                    : `0/${criterion.weight}`}
+                    : `not scored / ${criterion.weight}`}
                 </span>
               </div>
             </div>
@@ -189,7 +189,7 @@ export default function AssignmentGame({ assignmentId }: Props) {
       </>
     )}
     {phase === 'ended' && (
-      <div class={card({ size: 'sm' })}>
+      <div class={card({ size: 'sm' })} data-size="sm" data-slot="card">
         <div class={cardHeader()}>
           <h2 class={cardTitle()}>Game complete</h2>
           <p class={cardDescription()}>
@@ -202,7 +202,7 @@ export default function AssignmentGame({ assignmentId }: Props) {
             {captured ? 'Score copied' : 'Copy result'}
           </button>
           {summary && (
-            <p class="select-text break-words border border-border p-2 text-xs text-muted-foreground mt-3" role="status">
+            <p class={alert({ variant: 'default', class: 'select-text break-words p-3 text-xs text-muted-foreground' })} role="status">
               {captured ? 'Copied: ' : 'Copy unavailable. Select this summary: '}
               {summary}
             </p>
