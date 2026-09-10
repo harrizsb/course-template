@@ -26,6 +26,9 @@ Compose pages using existing Starwind components (Legos).
 - **One logical change per commit.** Never mix a refactor with a feature or a formatting sweep.
 - **Never** use `--no-verify` to bypass hooks, and never rewrite published history with `--force`; use `--force-with-lease` only on an unshared branch you own.
 
+## Orchestration
+- **Fan-out and fan-in, proactively.** For any non-trivial task, decompose it into independent slices and dispatch them as parallel subagents in a single batch. Fan out only independent units with disjoint file ownership; verify no overlap before spawn to avoid clobbering. Fan in by consolidating results and verifying the merged tree (via build/test) before declaring done. Never serialize work that can run concurrently, and never delegate the top-level plan.
+
 ## Output
 - Concise, production-ready Astro code only. No explanations unless asked.
 - **Engineering principles:** Guide load-bearing code with SOLID; apply YAGNI and avoid abstractions without a clear responsibility or a real consumer need.
