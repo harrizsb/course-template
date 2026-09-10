@@ -2,7 +2,7 @@
 import BaseLayout from '../layouts/BaseLayout.astro';
 import PageHeader from '../components/PageHeader.astro';
 import { Table, TableBody, TableCaption, TableCell, TableHead, TableHeader, TableRow } from '@/components/starwind/table';
-import { course, materialByFile, weeks } from '../data';
+import { assignments, course, materialByFile, weeks } from '../data';
 import { textLinkClass } from '../lib/ui';
 
 const scheduleMeta = `${course.code} · ${course.term} · ${course.schedule}, ${course.location}`;
@@ -20,39 +20,53 @@ const scheduleMeta = `${course.code} · ${course.term} · ${course.schedule}, ${
             <TableHead scope="col" class="w-16">Week</TableHead>
             <TableHead scope="col" class="w-32">Date</TableHead>
             <TableHead scope="col">Topic</TableHead>
+            <TableHead scope="col">Assignment</TableHead>
             <TableHead scope="col">Readings</TableHead>
             <TableHead scope="col" class="w-28">Materials</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
-          {weeks.map((w) => (
-            <TableRow>
-              <TableCell class="font-medium">{w.week}</TableCell>
-              <TableCell class="whitespace-nowrap text-sm text-muted-foreground">{w.date}</TableCell>
-              <TableCell class="font-medium">{w.topic}</TableCell>
-              <TableCell>
-                <ul class="list-disc pl-4 text-sm text-muted-foreground">
-                  {w.readings.map((r) => (
-                    <li>{r}</li>
-                  ))}
-                </ul>
-              </TableCell>
-              <TableCell>
-                <ul class="space-y-1 text-sm">
-                  {w.materials.map((file) => {
-                    const material = materialByFile[file];
-                    return material ? (
-                      <li>
-                        <a href={`/materials/${material.path}/`} class={textLinkClass}>
-                          {material.label}
-                        </a>
-                      </li>
-                    ) : null;
-                  })}
-                </ul>
-              </TableCell>
-            </TableRow>
-          ))}
+          {weeks.map((w) => {
+            const assignment = w.assignmentId === undefined ? undefined : assignments.find((a) => a.id === w.assignmentId);
+            return (
+              <TableRow>
+                <TableCell class="font-medium">{w.week}</TableCell>
+                <TableCell class="whitespace-nowrap text-sm text-muted-foreground">{w.date}</TableCell>
+                <TableCell class="font-medium">{w.topic}</TableCell>
+                <TableCell>
+                  {assignment ? (
+                    <a href={`/assignments/#assignment-${assignment.id}`} class={textLinkClass}>
+                      <span class="font-medium">{assignment.title}</span>
+                      <span class="block text-sm text-muted-foreground">Due {assignment.due}</span>
+                    </a>
+                  ) : (
+                    <span class="text-muted-foreground">-</span>
+                  )}
+                </TableCell>
+                <TableCell>
+                  <ul class="list-disc pl-4 text-sm text-muted-foreground">
+                    {w.readings.map((r) => (
+                      <li>{r}</li>
+                    ))}
+                  </ul>
+                </TableCell>
+                <TableCell>
+                  <ul class="space-y-1 text-sm">
+                    {w.materials.map((file) => {
+                      const material = materialByFile[file];
+                      return material ? (
+                        <li>
+                          <a href={`/materials/${material.path}/`} class={textLinkClass}>
+                            {material.label}
+                          </a>
+                        </li>
+                      ) : null;
+                    })}
+                  </ul>
+                </TableCell>
+              </TableRow>
+            );
+          })}
         </TableBody>
       </Table>
     </div>

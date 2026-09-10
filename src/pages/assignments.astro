@@ -3,7 +3,11 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 import PageHeader from '../components/PageHeader.astro';
 import Section from '../components/Section.astro';
 import { Table, TableBody, TableCaption, TableCell, TableHead, TableHeader, TableRow } from '@/components/starwind/table';
-import { assignments, course } from '../data';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/starwind/card';
+import { Button } from '@/components/starwind/button';
+import { assignments, course, rubricByAssignment } from '../data';
+import GamificationPanel from '../components/GamificationPanel.astro';
+import KaplayMissionGame from '../components/KaplayMissionGame';
 
 const meta = `${assignments.length} assignments · ${course.term}`;
 ---
@@ -38,10 +42,14 @@ const meta = `${assignments.length} assignments · ${course.term}`;
       </div>
     </Section>
 
+    <GamificationPanel />
+
+    <KaplayMissionGame client:visible />
+
     <Section id="details-heading" title="Details">
       <div class="space-y-8">
         {assignments.map((a) => (
-          <section aria-label={a.title}>
+          <section id={`assignment-${a.id}`} aria-label={a.title}>
             <h3 class="text-lg font-semibold mb-2">{a.id}. {a.title}</h3>
             <dl class="grid sm:grid-cols-2 gap-x-6 gap-y-1 text-sm">
               <dt class="text-muted-foreground">Due date</dt>
@@ -56,7 +64,40 @@ const meta = `${assignments.length} assignments · ${course.term}`;
                 <li>{req}</li>
               ))}
             </ul>
-          </section>
+            <div class="mt-6">
+              {(() => {
+                const rubric = rubricByAssignment[a.id];
+                if (!rubric) return null;
+                return (
+                  <Card>
+                    <CardHeader>
+                      <div class="flex items-center justify-between">
+                        <CardTitle class="text-sm font-semibold">Grading Rubric</CardTitle>
+                        {rubric.pdfPath && (
+                          <Button variant="outline" size="sm" href={`/materials/${rubric.pdfPath}/`} target="_blank" rel="noopener" class="h-7 px-2 text-xs">
+                            View PDF
+                          </Button>
+                        )}
+                      </div>
+                    </CardHeader>
+                    <CardContent>
+                      <div class="space-y-3">
+                        {rubric.criteria.map((criterion) => (
+                          <div class="flex justify-between items-start gap-4 text-xs">
+                            <div class="flex-1">
+                              <span class="font-medium text-foreground">{criterion.name}</span>
+                              <p class="text-muted-foreground leading-tight">{criterion.description}</p>
+                            </div>
+                            <span class="font-mono font-medium text-foreground shrink-0">{criterion.weight}%</span>
+                          </div>
+                        ))}
+                      </div>
+                    </CardContent>
+                  </Card>
+                );
+              })()}
+            </div>
+            </section>
         ))}
       </div>
     </Section>
